@@ -27,7 +27,7 @@ int main(int argc, char *argv[]) {
     string message = makeMessage(ipType);
 
     ///create what looks like an ordinary UDP socket
-    int fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+    int fd = socket(ipType==INET_ADDRSTRLEN ? AF_INET : AF_INET6, SOCK_DGRAM, IPPROTO_UDP);
     if (fd < 0) {
         perror("socket");
         return 1;
@@ -43,7 +43,7 @@ int main(int argc, char *argv[]) {
     ///set up destination address
     struct sockaddr_in addr{};
     memset(&addr, 0, sizeof(addr));
-    addr.sin_family = AF_INET;
+    addr.sin_family = ipType==INET_ADDRSTRLEN ? AF_INET : AF_INET6;
     addr.sin_addr.s_addr = htonl(INADDR_ANY); // differs from sender
     addr.sin_port = htons(port);
 
@@ -73,7 +73,7 @@ int main(int argc, char *argv[]) {
     ///start thread with sender
     pthread_t pthread;
     int error;
-    if ((error = pthread_create(&pthread, NULL, startSender, (void *) &args)) != 0) {
+    if ((error = pthread_create(&pthread, nullptr, startSender, (void *) &args)) != 0) {
         fprintf(stderr, "pthread_create() failed! : %s", strerror(error));
         return 0;
     }

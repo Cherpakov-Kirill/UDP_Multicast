@@ -14,4 +14,5 @@ typedef struct arguments {
 } arguments;
 
 void *startSender(void *args);
+
 #endif //LISTENER_SENDER_H

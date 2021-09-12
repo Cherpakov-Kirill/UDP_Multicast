@@ -1,7 +1,7 @@
 #include "receiver.h"
 
-int startReceiver(struct sockaddr_in addr, int fd){
-    while(1){
+int startReceiver(struct sockaddr_in addr, int fd) {
+    while (1) {
         char msgbuf[MSGBUFSIZE];
         int addrlen = sizeof(addr);
         int nbytes = recvfrom(fd, msgbuf, MSGBUFSIZE, 0, (struct sockaddr *) &addr,

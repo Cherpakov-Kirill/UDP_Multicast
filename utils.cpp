@@ -1,4 +1,5 @@
 #include "utils.h"
+
 string getIpAddr(int ipType) {
     struct ifaddrs *ifAddrStruct = nullptr;
     struct ifaddrs *ifa = nullptr;
@@ -45,7 +46,7 @@ string getIpAddr(int ipType) {
                 }
                 break;
             }
-            default:{
+            default: {
                 if (ifAddrStruct != nullptr) freeifaddrs(ifAddrStruct);//remember to free ifAddrStruct
                 return "Error with detecting ip";
             }
@@ -56,14 +57,14 @@ string getIpAddr(int ipType) {
     return ipString;
 }
 
-int getIpType(char* ip){
-    for(int i=0;i<=3;i++){
-        if(ip[i]=='.') return INET_ADDRSTRLEN;
+int getIpType(char *ip) {
+    for (int i = 0; i <= 3; i++) {
+        if (ip[i] == '.') return INET_ADDRSTRLEN;
     }
     return INET6_ADDRSTRLEN;
 }
 
-string makeMessage(int ipType){
+string makeMessage(int ipType) {
     string message = "ip: ";
     message += getIpAddr(ipType);
     message += "   pid: ";
