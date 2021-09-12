@@ -10,6 +10,7 @@ typedef struct arguments {
     int fd;
     int delay_secs;
     char *message;
+    char *group;
     struct sockaddr_in addr;
 } arguments;
 
