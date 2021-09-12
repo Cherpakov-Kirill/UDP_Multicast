@@ -16,7 +16,7 @@ using namespace std;
 typedef struct someArgs_tag {
     int fd;
     int delay_secs;
-    const char *msg;
+    char *pid;
     struct sockaddr_in addr;
     int out;
 } someArgs_t;
@@ -50,7 +50,7 @@ int main(int argc, char *argv[]) {
     int port = atoi(argv[2]);
 
     const int delay_secs = 1;
-    const char *message = "Hello, World!";
+    //const char *message = getpid();
 
     // create what looks like an ordinary UDP socket
     int fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
@@ -93,7 +93,7 @@ int main(int argc, char *argv[]) {
     args.addr = addr;
     args.fd = fd;
     args.delay_secs = delay_secs;
-    args.msg = message;
+    args.pid = reinterpret_cast<char *>(getpid());
 
 
     int error;
