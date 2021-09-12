@@ -7,37 +7,10 @@
 #include <cstdlib>
 #include <pthread.h>
 #include <string>
-#include <unistd.h>
 
-using namespace std;
-
-#define MSGBUFSIZE 256
-
-typedef struct someArgs_tag {
-    int fd;
-    int delay_secs;
-    const char *msg;
-    struct sockaddr_in addr;
-    int out;
-} someArgs_t;
-
-void *func(void *args) {
-    someArgs_t *arg = (someArgs_t *) args;
-    //printf("%d %s\n", arg->delay_secs, arg->msg);
-    printf("thread is started\n");
-    while (1) {
-        int nbytes = sendto(arg->fd, arg->msg, strlen(arg->msg), 0, (struct sockaddr *) &(arg->addr),
-                            sizeof(arg->addr));
-        if (nbytes < 0) {
-            perror("sendto");
-            return NULL;
-        }
-        sleep(arg->delay_secs); // Unix sleep is seconds
-    }
-
-    return NULL;
-}
-
+#include "utils.h"
+#include "receiver.h"
+#include "sender.h"
 
 int main(int argc, char *argv[]) {
     if (argc != 3) {
@@ -47,13 +20,14 @@ int main(int argc, char *argv[]) {
     }
 
     char *group = argv[1];
+    int ipType = getIpType(group);
     int port = atoi(argv[2]);
-
     const int delay_secs = 1;
-    const char *message = "Hello, World!";
+    string message = makeMessage(ipType);
+
 
     // create what looks like an ordinary UDP socket
-    int fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+    int fd = socket(ipType==INET_ADDRSTRLEN ? AF_INET : AF_INET6, SOCK_DGRAM, IPPROTO_UDP); ///AF_INET6
     if (fd < 0) {
         perror("socket");
         return 1;
@@ -67,9 +41,9 @@ int main(int argc, char *argv[]) {
     }
 
     // set up destination address
-    struct sockaddr_in addr;
+    struct sockaddr_in addr{};
     memset(&addr, 0, sizeof(addr));
-    addr.sin_family = AF_INET;
+    addr.sin_family = ipType==INET_ADDRSTRLEN ? AF_INET : AF_INET6;
     addr.sin_addr.s_addr = htonl(INADDR_ANY); // differs from sender
     addr.sin_port = htons(port);
 
@@ -80,7 +54,7 @@ int main(int argc, char *argv[]) {
     }
 
     // use setsockopt() to request that the kernel join a multicast group
-    struct ip_mreq mreq;
+    struct ip_mreq mreq{};
     mreq.imr_multiaddr.s_addr = inet_addr(group);
     mreq.imr_interface.s_addr = htonl(INADDR_ANY);
     if (setsockopt(fd, IPPROTO_IP, IP_ADD_MEMBERSHIP, (char *) &mreq, sizeof(mreq)) < 0) {
@@ -89,41 +63,21 @@ int main(int argc, char *argv[]) {
     }
 
     pthread_t pthread;
-    someArgs_t args;
+    arguments args;
     args.addr = addr;
     args.fd = fd;
     args.delay_secs = delay_secs;
-    args.msg = message;
+    args.message = new char[message.length() + 1];
+    strcpy(args.message, message.c_str());
 
-
+    ///start thread with sender
     int error;
-
-    if ((error = pthread_create(&pthread, NULL, func, (void *) &args)) != 0) {
+    if ((error = pthread_create(&pthread, nullptr, startSender, (void *) &args)) != 0) {
         fprintf(stderr, "pthread_create() failed! : %s", strerror(error));
         return 0;
     }
+    ///start receiver
+    startReceiver(addr, fd);
 
-    /*int status;
-    int status_addr;
-    if ((status = pthread_join(pthread, (void **) &status_addr)) != 0) {
-        printf("main error: can't join thread, status = %d\n", status);
-        return 0;
-    }
-    printf("joined with address %d\n", status_addr);
-    printf("thread arg.out = %d\n", args.out);*/
-
-    // now just enter a read-print loop
-    while (1) {
-        char msgbuf[MSGBUFSIZE];
-        int addrlen = sizeof(addr);
-        int nbytes = recvfrom(fd, msgbuf, MSGBUFSIZE, 0, (struct sockaddr *) &addr,
-                              reinterpret_cast<socklen_t *>(&addrlen));
-        if (nbytes < 0) {
-            perror("recvfrom");
-            return 1;
-        }
-        msgbuf[nbytes] = '\0';
-        puts(msgbuf);
-    }
     return 0;
 }
