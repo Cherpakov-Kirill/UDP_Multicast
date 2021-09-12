@@ -1,12 +1,5 @@
-#include <sys/types.h>
 #include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <cstring>
-#include <cstdio>
-#include <cstdlib>
 #include <pthread.h>
-#include <string>
 
 #include "receiver.h"
 #include "sender.h"
@@ -66,7 +59,7 @@ int main(int argc, char *argv[]) {
     args.addr = addr;
     args.fd = fd;
     args.delay_secs = delay_secs;
-    args.group = group;
+    args.addr.sin_addr.s_addr = inet_addr(group);
     args.message = (char*) malloc(sizeof(char)*message.length());
     strcpy(args.message, message.c_str());
 
