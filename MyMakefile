@@ -1,0 +1,2 @@
+all:
+	g++ main.cpp receiver.cpp receiver.h sender.cpp sender.h utils.cpp utils.h -O3 -pthread -o Multicast.out

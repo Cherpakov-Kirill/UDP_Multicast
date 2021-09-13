@@ -23,7 +23,7 @@ string getIpAddr(int ipType) {
                             ipString += addressBuffer[i];
                             i++;
                         }
-                        printf("ip_addr IPv4: %s\n", addressBuffer);
+                        //printf("Ip_addr IPv4: %s   pid: %d\n", addressBuffer, getpid());
                     }
                 }
                 break;

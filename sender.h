@@ -1,14 +1,17 @@
 #ifndef LISTENER_SENDER_H
 #define LISTENER_SENDER_H
 
-#include <netinet/in.h>
-#include <cstdio>
 #include <cstring>
+#include <iostream>
+#include <netinet/in.h>
 #include <unistd.h>
+
+using namespace std;
+
+const int delayForSender = 1;
 
 typedef struct arguments {
     int fd;
-    int delay_secs;
     char *message;
     struct sockaddr_in addr;
 } arguments;

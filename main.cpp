@@ -15,7 +15,6 @@ int main(int argc, char *argv[]) {
     char *group = argv[1];
     int port = atoi(argv[2]);
     int ipType = getIpType(group);
-    const int delay_secs = 1;
     string message = makeMessage(ipType);
 
     ///create what looks like an ordinary UDP socket
@@ -58,7 +57,6 @@ int main(int argc, char *argv[]) {
     arguments args;
     args.addr = addr;
     args.fd = fd;
-    args.delay_secs = delay_secs;
     args.addr.sin_addr.s_addr = inet_addr(group);
     args.message = (char*) malloc(sizeof(char)*message.length());
     strcpy(args.message, message.c_str());
